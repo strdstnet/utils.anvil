@@ -1,0 +1,3 @@
+{
+  "extends": "@strdst/tsconfig/tsconfig.json"
+}
