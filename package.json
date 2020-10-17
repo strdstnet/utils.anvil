@@ -10,9 +10,15 @@
   },
   "devDependencies": {
     "@strdst/tsconfig": "^1.0.0",
+    "@types/fs-extra": "^9.0.2",
     "@types/node": "^14.11.2",
     "@types/uuid": "^8.3.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "@strdst/utils.binary": "^1.0.3",
+    "@strdst/utils.nbt": "^1.0.2",
+    "fs-extra": "^9.0.1"
   }
 }
