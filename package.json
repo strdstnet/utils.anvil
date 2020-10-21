@@ -1,5 +1,5 @@
 {
-  "name": "@hyperstonenet/utils.",
+  "name": "@hyperstonenet/utils.anvil",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
