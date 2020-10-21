@@ -3,6 +3,15 @@ import { CompoundTag } from '@strdst/utils.nbt'
 import fs from 'fs-extra'
 import path from 'path'
 import zlib from 'zlib'
+import { Region } from './Region'
+
+export interface ILocationTableItem {
+  offset: number,
+  sectors: number,
+  timestamp: number,
+}
+
+export type LocationTable = Array<ILocationTableItem | null>
 
 export class Anvil {
 
@@ -46,45 +55,38 @@ export class Anvil {
       }
     }
 
-    // return regions
-    return [regions[0]]
+    return regions
   }
 
-  private async getRegion(x: number, z: number): Promise<number> {
+  private async getRegion(x: number, z: number): Promise<Region> {
     const data = fs.readFileSync(path.join(this.regionPath, `r.${x}.${z}.mca`))
     const buf = new BinaryData(data)
 
-    // buf.readByte()
-    // buf.readByte()
-    // buf.readByte()
-    // buf.readByte()
-    // const scheme = buf.readByte()
+    const table = this.readLocationTable(data)
 
-    // console.log(`${x}:${z} -`, scheme)
-
-    this.readLocationTable(buf)
-    this.readTimestampTable(buf)
-    
-    return 0
+    return new Region(x, z, table, buf)
   }
 
-  private async readLocationTable(data: BinaryData) {
-    for(let i = 0; i < 1024; i++) {
-      const offset = data.readUnsignedInt()
-      const size = data.readByte()
+  private readLocationTable(data: Buffer): LocationTable {
+    const table: LocationTable = []
 
-      console.log(offset * 4096, size * 4096)
+    for(let i = 0; i < 4096; i += 4) {
+      const offset = data.readUInt32BE(i)
+      const sectors = data.readIntBE(i + 3, 1)
+      const timestamp = data.readIntBE(i + 4096, 4)
 
-      // https://github.com/PrismarineJS/prismarine-provider-anvil/blob/078bbc1726d6e5fa0746f6bc237f402cc8c47f2e/src/region.js#L73
+      if(offset === 0 || sectors === 0) {
+        table[i] = null
+      } else {
+        table[i] = {
+          offset,
+          sectors,
+          timestamp,
+        }
+      }
     }
-  }
 
-  private async readTimestampTable(data: BinaryData) {
-    for(let i = 0; i < 1024; i++) {
-      const timestamp = data.readInt()
-
-      console.log(timestamp)
-    }
+    return table
   }
 
   public async parse(): Promise<void> {

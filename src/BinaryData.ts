@@ -19,8 +19,6 @@ export class BinaryData extends BData {
   }
 
   public readTagValue(tag: Tag): any {
-    console.log(tag.type)
-
     switch(tag.type) {
       case TagType.Long:
         return this.readLong()
@@ -39,6 +37,8 @@ export class BinaryData extends BData {
         }
       case TagType.Int:
         return this.readInt()
+      case TagType.IntArray:
+        return this.readTagArray('readInt', 'readInt')
       case TagType.ByteArray:
         return this.readTagArray('readByte', 'readInt')
     }
@@ -47,7 +47,7 @@ export class BinaryData extends BData {
   }
 
   public readUnsignedInt(skip = true): number {
-    const v = this.buf.readUInt32BE()
+    const v = this.buf.readUInt32BE(this.pos)
 
     if(skip) this.pos += DataLengths.INT
 
