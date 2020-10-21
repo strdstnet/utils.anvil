@@ -112,7 +112,7 @@ export class Anvil {
   public static async parse(levelPath: string): Promise<Anvil> {
     const anvil = new Anvil(levelPath)
 
-    const levelData = new BinaryData(fs.readFileSync(levelPath))
+    const levelData = new BinaryData(fs.readFileSync(anvil.levelDatPath))
     const regionCoords = await anvil.getRegions()
     const levelDat = await anvil.parseLevelDat(levelData)
 
