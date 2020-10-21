@@ -1,7 +1,7 @@
 import { BinaryData } from './BinaryData'
 import { LocationTable, ILocationTableItem } from './Anvil'
 import zlib from 'zlib'
-import { ByteTag, CompoundTag, IntArrayTag, IntTag, Tag } from '@strdst/utils.nbt'
+import { ByteArrayTag, ByteTag, CompoundTag, IntArrayTag, IntTag, ListTag, LongTag } from '@strdst/utils.nbt'
 
 export enum ChunkCompression {
   GZIP = 1,
@@ -13,6 +13,22 @@ type ChunkNBT = CompoundTag<{
     LightPopulated: ByteTag,
     zPos: IntTag,
     HeightMap: IntArrayTag,
+    LastUpdate: LongTag,
+    Biomes: ByteArrayTag,
+    InhabitedTime: LongTag,
+    xPos: IntTag,
+    TileEntities: ListTag<CompoundTag>,
+    Entities: ListTag<CompoundTag>,
+    TileTicks: ListTag,
+    Sections: ListTag<CompoundTag<{
+      Y: ByteTag,
+      SkyLight: ByteArrayTag,
+      Blocks: ByteArrayTag,
+      BlockLight: ByteArrayTag,
+      Data: ByteArrayTag,
+    }>>,
+    V: ByteTag,
+    TerrainPopulated: ByteTag
   }>,
 }>
 
