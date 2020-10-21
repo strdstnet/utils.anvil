@@ -8,7 +8,7 @@ export enum ChunkCompression {
   ZLIB = 2,
 }
 
-type ChunkNBT = CompoundTag<{
+export type ChunkNBT = CompoundTag<{
   Level: CompoundTag<{
     LightPopulated: ByteTag,
     zPos: IntTag,
@@ -41,8 +41,14 @@ export class Region {
     protected chunkData: BinaryData,
   ) {}
 
+  public static getChunkRegion(x: number, z: number): [number, number] {
+    return [x >> 5, z >> 5]
+  }
+
   public getChunkAbsolute(x: number, z: number) {
-    if(x >> 5 !== this.x || z >> 5 !== this.z) throw new Error('Attempted to load chunk from incorrect region')
+    const [rX, rZ] = Region.getChunkRegion(x, z)
+
+    if(rX !== this.x || rZ !== this.z) throw new Error('Attempted to load chunk from incorrect region')
 
     return this.getChunk(x & 0x1F, z & 0x1F)
   }

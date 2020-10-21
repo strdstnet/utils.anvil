@@ -3,7 +3,7 @@ import { CompoundTag } from '@strdst/utils.nbt'
 import fs from 'fs-extra'
 import path from 'path'
 import zlib from 'zlib'
-import { Region } from './Region'
+import { Region, ChunkNBT } from './Region'
 
 export interface ILocationTableItem {
   offset: number,
@@ -15,7 +15,13 @@ export type LocationTable = Array<ILocationTableItem | null>
 
 export class Anvil {
 
-  constructor(private levelPath: string) {}
+  private regions: Map<string, Region> = new Map()
+
+  private constructor(private levelPath: string) {}
+
+  private static getRegionId(x: number, z: number) {
+    return `region:${x}:${z}`
+  }
 
   private get levelDatPath() {
     return path.join(this.levelPath, 'level.dat')
@@ -64,7 +70,11 @@ export class Anvil {
 
     const table = this.readLocationTable(data)
 
-    return new Region(x, z, table, buf)
+    const region = new Region(x, z, table, buf)
+
+    this.regions.set(Anvil.getRegionId(x, z), region)
+
+    return region
   }
 
   private readLocationTable(data: Buffer): LocationTable {
@@ -89,12 +99,26 @@ export class Anvil {
     return table
   }
 
-  public async parse(): Promise<void> {
-    const levelData = new BinaryData(fs.readFileSync(this.levelDatPath))
-    const regionCoords = await this.getRegions()
-    const levelDat = await this.parseLevelDat(levelData)
+  public getChunk(x: number, z: number): null | ChunkNBT {
+    const [rX, rZ] = Region.getChunkRegion(x, z)
 
-    const regions = await Promise.all(regionCoords.map(([x, z]) => this.getRegion(x, z)))
+    const region = this.regions.get(Anvil.getRegionId(x, z))
+
+    if(!region) throw new Error(`Tried getting chunk from an unloaded region: Chunk ${x}:${z}, Region ${rX}:${rZ}`)
+
+    return region.getChunkAbsolute(x, z)
+  }
+
+  public static async parse(levelPath: string): Promise<Anvil> {
+    const anvil = new Anvil(levelPath)
+
+    const levelData = new BinaryData(fs.readFileSync(levelPath))
+    const regionCoords = await anvil.getRegions()
+    const levelDat = await anvil.parseLevelDat(levelData)
+
+    await Promise.all(regionCoords.map(([x, z]) => anvil.getRegion(x, z)))
+
+    return anvil
   }
 
 }
