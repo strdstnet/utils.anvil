@@ -1,5 +1,5 @@
 import { BinaryData as BData, DataLengths } from '@strdst/utils.binary'
-import { EndTag, ListTag, Tag, TagMapper, TagType } from '@strdst/utils.nbt'
+import { CompoundTag, EndTag, ListTag, Tag, TagMapper, TagType } from '@strdst/utils.nbt'
 
 export class BinaryData extends BData {
 
@@ -31,7 +31,7 @@ export class BinaryData extends BData {
           case TagType.Int:
             return this.readTagArray('readInt', 'readInt')
           case TagType.Compound:
-            return this.readTagArray('readTag', 'readInt')
+            return this.readCompoundList()
           default:
             throw new Error(`Don't know how to read ListTag.valueType of ${list.valueType}`)
         }
@@ -44,6 +44,33 @@ export class BinaryData extends BData {
     }
 
     return super.readTagValue(tag)
+  }
+
+  public readCompoundList(): CompoundTag[] {
+    const count = this.readInt()
+
+    let gotEnd = false
+
+    const compounds: CompoundTag[] = []
+    while(!gotEnd) {
+      const tag = new CompoundTag()
+
+      const tags: Record<string, Tag> = {}
+      for(let i = 0; i < count; i++) {
+        const tag = this.readTag()
+
+        if(tag instanceof EndTag) {
+          gotEnd = true
+          continue
+        }
+
+        tags[tag.name] = tag
+      }
+
+      compounds.push(tag.assign('', tags))
+    }
+
+    return compounds
   }
 
   public readUnsignedInt(skip = true): number {
