@@ -84,7 +84,7 @@ export class Region {
   }
 
   public hasChunk(x: number, z: number): boolean {
-    return this.getChunkLocationItem(x, z) !== null
+    return !!this.getChunkLocationItem(x, z)
   }
 
 }

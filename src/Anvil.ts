@@ -80,10 +80,11 @@ export class Anvil {
   private readLocationTable(data: Buffer): LocationTable {
     const table: LocationTable = []
 
-    for(let i = 0; i < 4096; i += 4) {
-      const offset = data.readUInt32BE(i)
-      const sectors = data.readIntBE(i + 3, 1)
-      const timestamp = data.readIntBE(i + 4096, 4)
+    for(let i = 0; i < 1024; i++) {
+      const pos = i * 4
+      const offset = data.readUInt32BE(pos)
+      const sectors = data.readIntBE(pos + 3, 1)
+      const timestamp = data.readIntBE(pos + 4096, 4)
 
       if(offset === 0 || sectors === 0) {
         table[i] = null
