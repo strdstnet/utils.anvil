@@ -23,7 +23,7 @@ export class BinaryData extends BData {
       case TagType.Long:
         return this.readLong()
       case TagType.String:
-        return this.readString(this.readShort())
+        return this.readStringShort()
       case TagType.List:
         const list = tag as ListTag
         list.valueType = this.readByte()
@@ -32,6 +32,14 @@ export class BinaryData extends BData {
             return this.readTagArray('readInt', 'readInt')
           case TagType.Compound:
             return this.readCompoundList()
+          case TagType.String:
+            return this.readTagArray('readStringShort', 'readInt')
+          case TagType.Double:
+            return this.readTagArray('readDouble', 'readInt')
+          case TagType.Float:
+            return this.readTagArray('readFloat', 'readInt')
+          case TagType.End:
+            return null
           default:
             throw new Error(`Don't know how to read ListTag.valueType of ${list.valueType}`)
         }
@@ -46,17 +54,21 @@ export class BinaryData extends BData {
     return super.readTagValue(tag)
   }
 
+  public readStringShort(): string {
+    return this.readString(this.readShort())
+  }
+
   public readCompoundList(): CompoundTag[] {
     const count = this.readInt()
 
-    let gotEnd = false
 
     const compounds: CompoundTag[] = []
-    while(!gotEnd) {
+    for(let i = 0; i < count; i++) {
       const tag = new CompoundTag()
-
       const tags: Record<string, Tag> = {}
-      for(let i = 0; i < count; i++) {
+
+      let gotEnd = false
+      while(!gotEnd) {
         const tag = this.readTag()
 
         if(tag instanceof EndTag) {
