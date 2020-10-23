@@ -102,7 +102,7 @@ export class Anvil {
   public getChunk(x: number, z: number): null | ChunkNBT {
     const [rX, rZ] = Region.getChunkRegion(x, z)
 
-    const region = this.regions.get(Anvil.getRegionId(x, z))
+    const region = this.regions.get(Anvil.getRegionId(rX, rZ))
 
     if(!region) throw new Error(`Tried getting chunk from an unloaded region: Chunk ${x}:${z}, Region ${rX}:${rZ}`)
 
