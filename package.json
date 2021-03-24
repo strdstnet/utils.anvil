@@ -2,7 +2,7 @@
   "name": "@strdstnet/utils.anvil",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "scripts": {
     "build": "rm -rf lib && tsc"
   },
